@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Crowd Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <h1>👁️ Crowd Detection AI</h1>
+        <p class="subtitle">Upload a video and let AI track people in real-time</p>
+
+        <form method="POST" enctype="multipart/form-data" class="upload-form">
+            <label class="file-input">
+                <input type="file" name="file" required>
+                <span>📂 Choose Video</span>
+            </label>
+
+            <button type="submit">🚀 Process Video</button>
+
+            <div class="progress-group">
+                <div class="progress-label" id="upload-progress-text">Upload Progress: 0%</div>
+                <progress id="upload-progress" value="0" max="100"></progress>
+            </div>
+
+            <div class="progress-group">
+                <div class="progress-label" id="processing-progress-text">Processing Progress: 0%</div>
+                <progress id="processing-progress" value="0" max="100"></progress>
+            </div>
+
+            <p id="status-message" class="status-message">Ready to upload a video.</p>
+        </form>
+
+        <div class="result" id="result-block" style="display: none;">
+            <h2>✅ Processed Output</h2>
+            <div class="result-container">
+                <div class="video-column">
+                    <video controls id="result-video" preload="metadata"></video>
+                </div>
+                <div class="count-column">
+                    <div class="count-display">
+                        <h3>👥 Crowd Count</h3>
+                        <div class="count-number" id="crowd-count">0</div>
+                        <p class="count-description">Total people detected and tracked in the video</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if video %}
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const block = document.getElementById('result-block');
+                const video = document.getElementById('result-video');
+                if (block && video) {
+                    block.style.display = 'block';
+                    video.src = '{{ video }}';
+                    video.load();
+                }
+            });
+        </script>
+        {% endif %}
+
+        {% if error %}
+            <p style="color:red;">{{ error }}</p>
+        {% endif %}
+
+        <script>
+            const form = document.querySelector('.upload-form');
+            const fileInput = document.querySelector('input[type="file"]');
+            const uploadBar = document.getElementById('upload-progress');
+            const uploadText = document.getElementById('upload-progress-text');
+            const processBar = document.getElementById('processing-progress');
+            const processText = document.getElementById('processing-progress-text');
+            const resultBlock = document.getElementById('result-block');
+            const resultVideo = document.getElementById('result-video');
+            const messageEl = document.getElementById('status-message');
+            let pollingInterval = null;
+
+            resultVideo.addEventListener('error', () => {
+                showMessage('Video playback failed. Check that the processed MP4 file was generated correctly.', true);
+            });
+
+            function showMessage(message, isError = false) {
+                messageEl.textContent = message;
+                messageEl.style.color = isError ? '#ff6b6b' : '#a8ffc4';
+            }
+
+            function updateProgress(bar, textEl, percent, label) {
+                bar.value = percent;
+                textEl.textContent = `${label}: ${percent}%`;
+            }
+
+            function resetBars() {
+                updateProgress(uploadBar, uploadText, 0, 'Upload Progress');
+                updateProgress(processBar, processText, 0, 'Processing Progress');
+                resultBlock.style.display = 'none';
+                showMessage('Ready to upload a video.');
+                if (pollingInterval) {
+                    clearInterval(pollingInterval);
+                    pollingInterval = null;
+                }
+            }
+
+            async function pollProgress() {
+                if (pollingInterval) {
+                    clearInterval(pollingInterval);
+                }
+
+                pollingInterval = setInterval(async () => {
+                    const response = await fetch('/progress');
+                    if (!response.ok) {
+                        return;
+                    }
+                    const status = await response.json();
+                    if (status.phase === 'processing') {
+                        updateProgress(processBar, processText, status.percent, 'Processing Progress');
+                        showMessage(status.message || 'Processing video...');
+                    }
+                    if (status.phase === 'done') {
+                        updateProgress(processBar, processText, 100, 'Processing Progress');
+                        showMessage(status.message || 'Processing complete!');
+                        if (status.count !== undefined) {
+                            document.getElementById('crowd-count').textContent = status.count;
+                        }
+                        clearInterval(pollingInterval);
+                        pollingInterval = null;
+                    }
+                    if (status.phase === 'error') {
+                        showMessage(status.message || 'Processing failed.', true);
+                        clearInterval(pollingInterval);
+                        pollingInterval = null;
+                    }
+                }, 500);
+            }
+
+            async function startProcessing(filename) {
+                showMessage('Processing video, please wait...');
+                pollProgress();
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename })
+                });
+
+                if (!response.ok) {
+                    const data = await response.json().catch(() => ({}));
+                    showMessage(data.error || 'Processing failed.', true);
+                    return;
+                }
+
+                const data = await response.json();
+                if (!data.video_url) {
+                    showMessage('No video URL returned by the server.', true);
+                    return;
+                }
+                const headResponse = await fetch(data.video_url, { method: 'HEAD' });
+                if (!headResponse.ok) {
+                    showMessage('Processed video file is not reachable. Please check the server logs.', true);
+                    return;
+                }
+
+                resultBlock.style.display = 'block';
+                resultVideo.src = data.video_url;
+                resultVideo.load();
+                if (data.count !== undefined) {
+                    document.getElementById('crowd-count').textContent = data.count;
+                }
+                updateProgress(processBar, processText, 100, 'Processing Progress');
+                showMessage('Video ready! Scroll down to preview.');
+                if (pollingInterval) {
+                    clearInterval(pollingInterval);
+                    pollingInterval = null;
+                }
+            }
+
+            form.addEventListener('submit', event => {
+                event.preventDefault();
+                const file = fileInput.files[0];
+                if (!file) {
+                    showMessage('Please choose a video file before uploading.', true);
+                    return;
+                }
+
+                resetBars();
+                showMessage('Uploading video...');
+
+                const formData = new FormData();
+                formData.append('file', file);
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', '/upload', true);
+
+                xhr.upload.onprogress = event => {
+                    if (event.lengthComputable) {
+                        const percent = Math.round((event.loaded / event.total) * 100);
+                        updateProgress(uploadBar, uploadText, percent, 'Upload Progress');
+                    }
+                };
+
+                xhr.onload = () => {
+                    if (xhr.status === 200) {
+                        updateProgress(uploadBar, uploadText, 100, 'Upload Progress');
+                        const data = JSON.parse(xhr.responseText);
+                        startProcessing(data.filename);
+                    } else {
+                        const error = xhr.responseText ? JSON.parse(xhr.responseText).error : 'Upload failed';
+                        showMessage(error, true);
+                    }
+                };
+
+                xhr.onerror = () => {
+                    showMessage('Upload failed due to network error.', true);
+                };
+
+                xhr.send(formData);
+            });
+        </script>
+    </div>
+
+    <footer>
+        <p>Built with ❤️ using Flask + YOLOv5</p>
+    </footer>
+</div>
+
+</body>
+</html>

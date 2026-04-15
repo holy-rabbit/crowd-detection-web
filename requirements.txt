@@ -3,7 +3,15 @@ torch
 torchvision
 opencv-python
 numpy
+scikit-image
 filterpy
 scipy
-pillow
 matplotlib
+pandas
+seaborn
+pillow
+requests
+tqdm
+pyyaml
+ultralytics
+ffmpeg-python

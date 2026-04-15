@@ -1,0 +1,179 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+    height: 100vh;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+.container {
+    text-align: center;
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 40px;
+    border-radius: 20px;
+    backdrop-filter: blur(15px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    width: 600px;
+    max-width: 90vw;
+}
+
+h1 {
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    font-size: 14px;
+    color: #ccc;
+    margin-bottom: 30px;
+}
+
+.upload-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.file-input {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+}
+
+.file-input input[type="file"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.file-input span {
+    display: block;
+    padding: 12px;
+    background: #ffffff20;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.file-input span:hover {
+    background: #ffffff40;
+}
+
+button {
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #00c6ff, #0072ff);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    transform: scale(1.05);
+}
+
+.progress-group {
+    text-align: left;
+    margin-top: 12px;
+}
+
+.progress-label {
+    font-size: 12px;
+    color: #d1e9ff;
+    margin-bottom: 6px;
+}
+
+progress {
+    width: 100%;
+    height: 16px;
+    border-radius: 10px;
+    appearance: none;
+}
+
+progress::-webkit-progress-bar {
+    background: rgba(255,255,255,0.15);
+    border-radius: 10px;
+}
+
+progress::-webkit-progress-value {
+    background: linear-gradient(135deg, #00c6ff, #0072ff);
+    border-radius: 10px;
+}
+
+.status-message {
+    margin-top: 12px;
+    font-size: 14px;
+    color: #a8ffc4;
+}
+
+.result {
+    margin-top: 25px;
+}
+
+.result-container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    margin-top: 15px;
+}
+
+.video-column {
+    flex: 2;
+}
+
+.count-column {
+    flex: 1;
+    min-width: 200px;
+}
+
+.count-display {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 20px;
+    border-radius: 15px;
+    backdrop-filter: blur(15px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    text-align: center;
+}
+
+.count-display h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #00c6ff;
+}
+
+.count-number {
+    font-size: 48px;
+    font-weight: bold;
+    color: #a8ffc4;
+    margin-bottom: 10px;
+}
+
+.count-description {
+    font-size: 12px;
+    color: #ccc;
+}
+
+video {
+    width: 100%;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+footer {
+    margin-top: 20px;
+    font-size: 12px;
+    color: #aaa;
+}
