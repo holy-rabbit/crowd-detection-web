@@ -173,3 +173,14 @@ docs/_build/
 processed_*.mp4
 output_*.mp4
 temp_*.mp4
+# Additional patterns for ML/AI Flask app
+*.h5
+*.hdf5
+*.pkl
+*.joblib
+data/
+datasets/
+sessions/
+*.session
+.flaskenv
+webassets-cache/
