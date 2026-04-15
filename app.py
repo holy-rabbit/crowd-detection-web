@@ -9,6 +9,11 @@ import subprocess
 import shutil
 from sort import Sort
 
+# Configure matplotlib for headless operation
+import matplotlib
+matplotlib.use('Agg')  # Use non-interactive backend
+import matplotlib.pyplot as plt
+
 app = Flask(__name__)
 
 UPLOAD_FOLDER = "static/uploads"
@@ -27,7 +32,8 @@ progress_status = {
 
 # Load YOLOv5 model once
 print("Loading YOLOv5 model...")
-model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
+from ultralytics import YOLO
+model = YOLO('yolov5s.pt')  # This will download yolov5s.pt if not present
 print("Model loaded!")
 
 # Initialize tracker
@@ -65,10 +71,25 @@ def process_video(input_path, output_path):
         results = model(frame)
         detections = []
 
-        for *xyxy, conf, cls in results.xyxy[0]:
-            if int(cls) == 0:  # person class
-                x1, y1, x2, y2 = map(int, xyxy)
-                detections.append([x1, y1, x2, y2, float(conf)])
+        # Extract person detections (class 0)
+        if hasattr(results, 'xyxy') and len(results.xyxy) > 0:
+            for *xyxy, conf, cls in results.xyxy[0]:
+                if int(cls) == 0:  # person class
+                    x1, y1, x2, y2 = map(int, xyxy)
+                    detections.append([x1, y1, x2, y2, float(conf)])
+        else:
+            # Fallback for different result formats
+            for result in results:
+                if hasattr(result, 'boxes'):
+                    boxes = result.boxes
+                    for box in boxes:
+                        if hasattr(box, 'cls') and hasattr(box, 'conf') and hasattr(box, 'xyxy'):
+                            cls = int(box.cls.item())
+                            conf = box.conf.item()
+                            xyxy = box.xyxy[0].cpu().numpy()
+                            if cls == 0:  # person class
+                                x1, y1, x2, y2 = map(int, xyxy)
+                                detections.append([x1, y1, x2, y2, conf])
 
         if len(detections) > 0:
             tracked_objects = tracker.update(np.array(detections))
