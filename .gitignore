@@ -1,0 +1,175 @@
+# Virtual Environments
+venv/
+env/
+ENV/
+.venv
+.env
+.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Virtual Environment
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.project
+.pydevproject
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+Thumbs.db
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# Application specific
+static/uploads/
+static/output/
+uploads/
+output/
+*.mp4
+*.avi
+*.mov
+*.flv
+*.wmv
+*.webm
+
+# Model files (will be downloaded at runtime)
+*.pt
+*.pth
+*.weights
+yolov5s.pt
+yolov5m.pt
+yolov5l.pt
+yolov5x.pt
+
+# Cache directories
+.cache/
+.torch/
+runs/
+__MACOSX/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*.log
+logs/
+*.log.*
+
+# Docker
+.docker/
+.dockerignore
+
+# Git
+.git/
+.gitignore
+
+# Node (if any frontend build)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# System files
+.AppleDouble
+.LSOverride
+.TemporaryItems
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Credentials and secrets
+.env.secret
+secrets.json
+credentials/
+*.pem
+*.key
+*.cert
+# Additional ML/AI patterns
+models/
+checkpoints/
+experiments/
+wandb/
+mlruns/
+.lightning/
+
+# Flask specific
+instance/
+.flaskenv
+.webassets-cache
+
+# Testing
+.coverage
+htmlcov/
+*.cover
+
+# IDE specific
+.vscode/settings.json
+.vscode/launch.json
+.idea/workspace.xml
+.idea/tasks.xml
+
+# Documentation
+docs/_build/
+*.pdf
+*.docx
+
+# Video processing patterns
+processed_*.mp4
+output_*.mp4
+temp_*.mp4
