@@ -1,4 +1,6 @@
 flask
+flask-sqlalchemy
+flask-login
 torch
 torchvision
 opencv-python
@@ -15,3 +17,6 @@ tqdm
 pyyaml
 ultralytics
 ffmpeg-python
+psycopg2-binary
+sqlalchemy
+werkzeug

@@ -4,10 +4,15 @@ FROM python:3.10-slim
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
+# Update Debian mirror for better connectivity
+RUN sed -i 's/deb.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list.d/debian.sources || true && \
+    sed -i 's/deb.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list || true
+
+# Install system dependencies with retries
+RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
     curl \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 # Create directories for uploads and outputs
@@ -17,7 +22,15 @@ RUN mkdir -p static/uploads static/output
 COPY requirements.txt .
 
 # Install Python dependencies
-RUN pip install --no-cache-dir --default-timeout=100 --retries=10 -r requirements.txt
+# Upgrade pip first, then install with SSL/timeout workarounds
+RUN pip install --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir \
+    --default-timeout=1000 \
+    --retries=10 \
+    --trusted-host pypi.python.org \
+    --trusted-host pypi.org \
+    --trusted-host files.pythonhosted.org \
+    -r requirements.txt
 
 # Copy the rest of the application
 COPY . .

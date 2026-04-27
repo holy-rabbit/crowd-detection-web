@@ -1,8 +1,28 @@
-version: '3.8'
-
 services:
+  postgres:
+    image: postgres:15
+    container_name: crowd_detection_db
+    environment:
+      POSTGRES_USER: crowd_user
+      POSTGRES_PASSWORD: crowd_password
+      POSTGRES_DB: crowd_detection_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U crowd_user -d crowd_detection_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
   crowd-detection:
     build: .
+    container_name: crowd_detection_app
     ports:
       - "5000:5000"
     volumes:
@@ -11,10 +31,24 @@ services:
     environment:
       - FLASK_ENV=development
       - FFMPEG_PATH=/usr/bin/ffmpeg
+      - DATABASE_URL=postgresql://crowd_user:crowd_password@postgres:5432/crowd_detection_db
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      test: ["CMD", "curl", "-f", "http://localhost:5000/login"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 60s
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge
